@@ -1,5 +1,7 @@
 const UserSchema = require('../models/user.model')
-const bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
+var salt = bcrypt.genSaltSync(10);
+
 
 const register = async (req, res, next) => {
     try {
@@ -12,7 +14,7 @@ const register = async (req, res, next) => {
         if (emailCheck) {
             return res.json({ msg: "Email is already used ", status: false })
         }
-        const hassPass = await bcrypt.hash(password, 10)
+        const hassPass = await bcrypt.hash(password, salt)
         const createUser = await UserSchema.create({
             username,
             email,
@@ -32,7 +34,7 @@ const login = async (req, res, next) => {
         if (!user) {
             return res.json({ msg: 'Username or password is incorrect !', status: false })
         }
-        const isPassword = await bcrypt.compare(password, user.password)
+        const isPassword = await bcrypt.compareSync(password, user.password)
         if (!isPassword) {
             return res.json({ msg: 'Username or password is incorrect !', status: false })
         }
